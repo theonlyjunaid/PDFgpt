@@ -27,7 +27,7 @@ const UploadDropzone = () => {
         const { startUpload } = useUploadThing(
           'freePlanUploader'
         )
-      
+        
         const { mutate: startPolling } = trpc.getFile.useMutation(
           {
             onSuccess: (file) => {
