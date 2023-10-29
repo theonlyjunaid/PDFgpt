@@ -9,6 +9,7 @@ const Page = () => {
 
   const searchParams = useSearchParams()
   const origin = searchParams.get('origin')
+  console.log("hola")
   trpc.authCallback.useQuery(undefined, {
     onSuccess: ({ success }) => {
       if (success) {
