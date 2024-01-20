@@ -16,10 +16,12 @@ import {
 import { PLANS } from '@/config/stripe'
 
 export const appRouter = router({
+
   authCallback: publicProcedure.query(async () => {
+    console.log('authCallback')
     const { getUser } = getKindeServerSession()
     const user = getUser()
-
+    console.log('user', user)
     if (!user.id || !user.email)
       throw new TRPCError({ code: 'UNAUTHORIZED' })
 
@@ -29,7 +31,7 @@ export const appRouter = router({
         id: user.id,
       },
     })
-
+    console.log('dbUser', dbUser)
     if (!dbUser) {
       // create user in db
       await db.user.create({
