@@ -1,12 +1,13 @@
 import { db } from '@/db'
 import { openai } from '@/lib/openai'
-import { getPineconeClient } from '@/lib/pinecone'
+// import { getPineconeClient } from '@/lib/pinecone'
 import { SendMessageValidator } from '@/lib/validators/SendMessageValidator'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
-import { PineconeStore } from 'langchain/vectorstores/pinecone'
+import { OpenAIEmbeddings } from '@langchain/openai'
+import { PineconeStore } from '@langchain/pinecone'
 import { NextRequest } from 'next/server'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
+import { Pinecone } from '@pinecone-database/pinecone'
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json()
@@ -35,40 +36,35 @@ export const POST = async (req: NextRequest) => {
     }
   })
   const embeddings = new OpenAIEmbeddings({
-    openAIApiKey: process.env.OPENAI_API_KEY,
+    openAIApiKey: process.env.OPENAI_API_KEY
   })
 
-  const pinecone = await getPineconeClient()
+  const pinecone = new Pinecone({
+    apiKey: 'b33d6f38-01b1-4232-bc81-517d0318668d'
+    // environment: 'gcp-starter'
+  })
   const pineconeIndex = pinecone.Index('canopy--document-uploader')
 
-  const vectorStore = await PineconeStore.fromExistingIndex(
-    embeddings,
-    {
-      pineconeIndex,
-      //   namespace: file.id,
-    }
-  )
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    pineconeIndex
+  })
 
-  const results = await vectorStore.similaritySearch(
-    message,
-    4, {
+  const results = await vectorStore.similaritySearch(message, 2, {
     fileId: file.id
-  }
-  )
+  })
+  console.log({ results })
   const prevMessages = await db.message.findMany({
     where: {
-      fileId,
+      fileId
     },
     orderBy: {
-      createdAt: 'asc',
+      createdAt: 'asc'
     },
-    take: 6,
+    take: 6
   })
   const formattedPrevMessages = prevMessages.map((msg) => ({
-    role: msg.isUserMessage
-      ? ('user' as const)
-      : ('assistant' as const),
-    content: msg.text,
+    role: msg.isUserMessage ? ('user' as const) : ('assistant' as const),
+    content: msg.text
   }))
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
@@ -78,7 +74,7 @@ export const POST = async (req: NextRequest) => {
       {
         role: 'system',
         content:
-          'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.',
+          'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.'
       },
       {
         role: 'user',
@@ -88,8 +84,7 @@ export const POST = async (req: NextRequest) => {
   
   PREVIOUS CONVERSATION:
   ${formattedPrevMessages.map((message) => {
-          if (message.role === 'user')
-            return `User: ${message.content}\n`
+          if (message.role === 'user') return `User: ${message.content}\n`
           return `Assistant: ${message.content}\n`
         })}
   
@@ -98,9 +93,9 @@ export const POST = async (req: NextRequest) => {
   CONTEXT:
   ${results.map((r) => r.pageContent).join('\n\n')}
   
-  USER INPUT: ${message}`,
-      },
-    ],
+  USER INPUT: ${message}`
+      }
+    ]
   })
   const stream = OpenAIStream(response, {
     async onCompletion(completion) {
@@ -109,10 +104,10 @@ export const POST = async (req: NextRequest) => {
           text: completion,
           isUserMessage: false,
           fileId,
-          userId,
-        },
+          userId
+        }
       })
-    },
+    }
   })
 
   return new StreamingTextResponse(stream)

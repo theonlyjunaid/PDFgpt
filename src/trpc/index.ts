@@ -18,7 +18,7 @@ import { PLANS } from '@/config/stripe'
 export const appRouter = router({
 
   authCallback: publicProcedure.query(async () => {
-    console.log('authCallback')
+    console.log('authCalback')
     const { getUser } = getKindeServerSession()
     const user = getUser()
     console.log('user', user)
