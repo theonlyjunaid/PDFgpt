@@ -22,7 +22,6 @@ const Page = async ({ params }: PageProps) => {
   const file = await db.file.findFirst({
     where: {
       id: fileid,
-      userId: user.id,
     },
   });
 
