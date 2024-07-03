@@ -10,7 +10,7 @@ const Providers = ({ children }: PropsWithChildren) => {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "https://docu-convo-website.vercel.app/api/trpc",
+          url: process.env.KINDE_SITE_URL + "/api/trpc",
         }),
       ],
     })
