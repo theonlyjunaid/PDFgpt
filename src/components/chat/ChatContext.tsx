@@ -35,16 +35,13 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async ({ message }: { message: string }) => {
-      const response = await fetch(
-        "https://docu-convo-website.vercel.app/api/message",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            fileId,
-            message,
-          }),
-        }
-      );
+      const response = await fetch("/api/message", {
+        method: "POST",
+        body: JSON.stringify({
+          fileId,
+          message,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to send message");
