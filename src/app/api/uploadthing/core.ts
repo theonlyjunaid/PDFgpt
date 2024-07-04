@@ -31,21 +31,12 @@ const onUploadComplete = async ({
     url: string
   }
 }) => {
-  const isFileExist = await db.file.findFirst({
-    where: {
-      key: file.key
-    }
-  })
+  // const isFileExist = await db.file.findFirst({
+  //   where: {
+  //     key: file.key
+  //   }
+  // })
 
-  if (isFileExist) return
-
-  console.log({
-    key: file.key,
-    name: file.name,
-    userId: metadata.userId,
-    url: `https://utfs.io/f/${file.key}`,
-    uploadStatus: 'PROCESSING'
-  })
   const createdFile = await db.file.create({
     data: {
       key: file.key,
@@ -55,6 +46,15 @@ const onUploadComplete = async ({
       uploadStatus: 'PROCESSING'
     }
   })
+
+  console.log({
+    key: file.key,
+    name: file.name,
+    userId: metadata.userId,
+    url: `https://utfs.io/f/${file.key}`,
+    uploadStatus: 'PROCESSING'
+  })
+
 
   try {
     const response = await fetch(`https://utfs.io/f/${file.key}`)
