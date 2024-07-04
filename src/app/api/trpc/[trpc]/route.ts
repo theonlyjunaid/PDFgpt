@@ -3,7 +3,7 @@ import { appRouter } from '@/trpc'
 
 const handler = (req: Request) =>
   fetchRequestHandler({
-    endpoint: '/api/trpc',
+    endpoint: 'https://docu-convo-website.vercel.app/api/trpc',
     req,
     router: appRouter,
     createContext: () => ({}),
